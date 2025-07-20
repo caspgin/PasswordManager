@@ -1,0 +1,34 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.rpm
+*.deb
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when using the "-o" flag
+*.out
+
+# Directories created by `go mod download`
+mod
+
+# Dependency directories
+vendor/
+
+# Go build cache
+.go/
+
+# Environment variables
+.env
+.flaskenv
+
+# Editor-specific files
+.idea/
+.vscode/
+*.swp
+*.bak
+*~
+.DS_Store
