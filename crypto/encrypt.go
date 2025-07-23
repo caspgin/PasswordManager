@@ -6,10 +6,13 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 
 	"golang.org/x/crypto/pbkdf2"
 )
+
+const KEY_LEN int = 32
 
 // Performs AES256-GCM Encrytion on data using MasterEncryptionKey(MEK)
 func Encrypt(MEK []byte, data []byte) ([]byte, []byte, error) {
@@ -42,7 +45,7 @@ func Encrypt(MEK []byte, data []byte) ([]byte, []byte, error) {
 	return nonce, cipherText, nil
 }
 
-func Decrypt(MEK []byte, nonce []byte, cipherText []byte) ([]byte, error) {
+func Decrypt(MEK []byte, data []byte) ([]byte, error) {
 
 	cipherBlock, err := aes.NewCipher(MEK)
 	if err != nil {
@@ -55,14 +58,23 @@ func Decrypt(MEK []byte, nonce []byte, cipherText []byte) ([]byte, error) {
 	if err != nil {
 		return nil, errors.New("Decryption Failed: " + err.Error())
 	}
-
-	data, err := aesGCM.Open(nil, nonce, cipherText, nil)
+	nonce := data[0:aesGCM.NonceSize()]
+	cipherText := data[aesGCM.NonceSize():]
+	decryptedData, err := aesGCM.Open(nil, nonce, cipherText, nil)
 	if err != nil {
 		return nil, errors.New("Decryption and/or Authentication Failed: " + err.Error())
 	}
-	return data, nil
+	return decryptedData, nil
+}
+
+func GenerateSalt() ([]byte, error) {
+	salt := make([]byte, KEY_LEN)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return nil, fmt.Errorf("Could not generate a Salt: %w", err)
+	}
+	return salt, nil
 }
 
 func GetDerivedKey(masterPassword []byte, salt []byte, iteration int) []byte {
-	return pbkdf2.Key(masterPassword, salt, iteration, 32, sha256.New)
+	return pbkdf2.Key(masterPassword, salt, iteration, KEY_LEN, sha256.New)
 }
