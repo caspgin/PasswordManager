@@ -2,6 +2,7 @@ package main
 
 import (
 	"PasswordManager/controller"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +13,12 @@ import (
 )
 
 var globalApp controller.App
+
+type SignupRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
 
 func main() {
 	globalApp = *controller.NewApp()
@@ -41,6 +48,18 @@ func handleSignup(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(injected))
 		return
 	} else if r.Method == http.MethodPost {
+		body, _ := io.ReadAll(r.Body)
+		var signupData SignupRequest
+		json.Unmarshal(body, &signupData)
+		err := globalApp.SignUp(signupData.Username, signupData.Password)
+		if err != nil {
+			http.Error(w, "Something went wrong", 400)
+			log.Printf("Error Signing up, %v", err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful!"})
 
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -59,6 +78,8 @@ func handleSignin(w http.ResponseWriter, r *http.Request) {
 		injected := strings.Replace(string(htmlContent), "</head>", `<script> window.initialFormType = 'signin';</script></head>`, 1)
 		w.Write([]byte(injected))
 		return
+	} else if r.Method == http.MethodPost {
+
 	}
 }
 
