@@ -18,12 +18,15 @@ func NewApp() *App {
 	return &App{}
 }
 
-func SignUp(username string, password string) error {
+func (app *App) SignUp(username string, password string) error {
 	//Check if user Exists
-	_, err := user.GetUser(username)
+	recievedUser, err := user.GetUser(username)
 
-	if err == nil {
-		return fmt.Errorf("Username %q already exists.", username)
+	if err != nil {
+		return fmt.Errorf("something went wrong %w", err)
+	}
+	if recievedUser != nil {
+		return fmt.Errorf("User %q already exist", username)
 	}
 	//Generate a new Salt
 	salt, err := crypto.GenerateSalt()
