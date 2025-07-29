@@ -58,8 +58,14 @@ func Decrypt(MEK []byte, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, errors.New("Decryption Failed: " + err.Error())
 	}
+	if len(data) < 12 {
+		return []byte{}, nil
+	}
 	nonce := data[0:aesGCM.NonceSize()]
 	cipherText := data[aesGCM.NonceSize():]
+	if len(cipherText) == 0 {
+		return []byte{}, nil
+	}
 	decryptedData, err := aesGCM.Open(nil, nonce, cipherText, nil)
 	if err != nil {
 		return nil, errors.New("Decryption and/or Authentication Failed: " + err.Error())

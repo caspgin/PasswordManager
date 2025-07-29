@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>My Password Vault</title>
+	<style>
+		/* Basic Reset & Body Styling */
+		body {
+			font-family:
+				'Inter', sans-serif;
+			/* Using Inter as a modern, clean font */
+			margin: 0;
+			padding: 20px;
+			background-color: #f4f7f6;
+			/* Light background */
+			color: #333;
+			line-height: 1.6;
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+			/* Align to top for longer content */
+			min-height: 100vh;
+			/* Ensure it takes full viewport height */
+			box-sizing: border-box;
+			/* Include padding in element's total width and height */
+		}
+
+		/* Container for the whole app */
+		.container {
+			background-color: #ffffff;
+			padding: 30px;
+			border-radius: 12px;
+			/* Rounded corners for the container */
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+			/* Soft shadow */
+			width: 100%;
+			max-width: 900px;
+			/* Max width for desktop view */
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: column;
+			gap: 30px;
+			/* Space between sections */
+		}
+
+		/* Header Styling */
+		header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding-bottom: 20px;
+			border-bottom: 1px solid #eee;
+		}
+
+		header h1 {
+			margin: 0;
+			color: #2c3e50;
+			/* Darker blue for headings */
+			font-size: 2em;
+		}
+
+		/* Buttons */
+		.btn {
+			padding: 10px 20px;
+			border: none;
+			border-radius: 8px;
+			/* Rounded buttons */
+			cursor: pointer;
+			font-size: 1em;
+			font-weight: 600;
+			transition:
+				background-color 0.3s ease,
+				transform 0.2s ease;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+			/* Button shadow */
+		}
+
+		.btn-primary {
+			background-color: #3498db;
+			/* Blue */
+			color: white;
+		}
+
+		.btn-primary:hover {
+			background-color: #2980b9;
+			transform: translateY(-2px);
+		}
+
+		.btn-danger {
+			background-color: #e74c3c;
+			/* Red */
+			color: white;
+		}
+
+		.btn-danger:hover {
+			background-color: #c0392b;
+			transform: translateY(-2px);
+		}
+
+		/* Message Display */
+		.message {
+			padding: 12px 20px;
+			margin-bottom: 20px;
+			border-radius: 8px;
+			font-weight: 500;
+			display: none;
+			/* Hidden by default, shown by JS */
+			text-align: center;
+		}
+
+		.message.success {
+			background-color: #d4edda;
+			color: #155724;
+			border: 1px solid #c3e6cb;
+		}
+
+		.message.error {
+			background-color: #f8d7da;
+			color: #721c24;
+			border: 1px solid #f5c6cb;
+		}
+
+		.message.info {
+			background-color: #d1ecf1;
+			color: #0c5460;
+			border: 1px solid #bee5eb;
+		}
+
+		/* Credentials List Section */
+		.credentials-list h2 {
+			color: #2c3e50;
+			margin-bottom: 15px;
+			font-size: 1.5em;
+		}
+
+		#credentialsTable {
+			width: 100%;
+			border-collapse: separate;
+			/* Allows border-radius on cells */
+			border-spacing: 0;
+			margin-bottom: 20px;
+		}
+
+		#credentialsTable thead th {
+			background-color: #ecf0f1;
+			/* Light grey header */
+			padding: 12px 15px;
+			text-align: left;
+			font-weight: 600;
+			color: #555;
+			border-bottom: 2px solid #bdc3c7;
+		}
+
+		#credentialsTable tbody tr {
+			background-color: #ffffff;
+			border-bottom: 1px solid #f0f0f0;
+			transition: background-color 0.2s ease;
+		}
+
+		#credentialsTable tbody tr:hover {
+			background-color: #f9f9f9;
+		}
+
+		#credentialsTable tbody td {
+			padding: 12px 15px;
+			vertical-align: top;
+			word-break: break-all;
+			/* Break long words */
+		}
+
+		#noCredentialsMessage {
+			text-align: center;
+			color: #777;
+			margin-top: 20px;
+			font-style: italic;
+		}
+
+		/* Add Credential Form Section */
+		.add-credential-form h2 {
+			color: #2c3e50;
+			margin-bottom: 15px;
+			font-size: 1.5em;
+		}
+
+		.form-group {
+			margin-bottom: 15px;
+		}
+
+		.form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: #555;
+		}
+
+		.form-group input[type='text'],
+		.form-group input[type='url'],
+		.form-group input[type='password'],
+		.form-group textarea {
+			width: calc(100% - 24px);
+			/* Account for padding */
+			padding: 12px;
+			border: 1px solid #ccc;
+			border-radius: 8px;
+			font-size: 1em;
+			box-sizing: border-box;
+			/* Include padding in width */
+			transition:
+				border-color 0.3s ease,
+				box-shadow 0.3s ease;
+		}
+
+		.form-group input:focus,
+		.form-group textarea:focus {
+			border-color: #3498db;
+			box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+			outline: none;
+		}
+
+		.form-group textarea {
+			resize: vertical;
+			/* Allow vertical resizing */
+			min-height: 80px;
+		}
+
+		/* Responsive Adjustments */
+		@media (max-width: 768px) {
+			body {
+				padding: 15px;
+			}
+
+			.container {
+				padding: 20px;
+				gap: 20px;
+			}
+
+			header {
+				flex-direction: column;
+				align-items: flex-start;
+				padding-bottom: 15px;
+			}
+
+			header h1 {
+				font-size: 1.8em;
+				margin-bottom: 10px;
+			}
+
+			.btn {
+				width: 100%;
+				margin-top: 10px;
+			}
+
+			#credentialsTable thead {
+				display: none;
+				/* Hide table headers on small screens */
+			}
+
+			#credentialsTable tbody,
+			#credentialsTable tr,
+			#credentialsTable td {
+				display: block;
+				/* Make table elements behave like blocks */
+				width: 100%;
+			}
+
+			#credentialsTable tbody tr {
+				margin-bottom: 15px;
+				border: 1px solid #eee;
+				border-radius: 8px;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			}
+
+			#credentialsTable tbody td {
+				text-align: right;
+				padding-left: 50%;
+				/* Space for pseudo-element label */
+				position: relative;
+				border: none;
+				/* Remove individual cell borders */
+			}
+
+			#credentialsTable tbody td::before {
+				content: attr(data-label);
+				/* Use data-label for content */
+				position: absolute;
+				left: 15px;
+				width: calc(50% - 30px);
+				text-align: left;
+				font-weight: 600;
+				color: #555;
+			}
+
+			/* Assign data-label to each td in vault.html for mobile view */
+			/* Example: <td data-label="URL">...</td> */
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<header>
+			<h1>My Password Vault</h1>
+			<button id="logoutBtn" class="btn btn-danger">Logout</button>
+		</header>
+
+		<section class="credentials-list">
+			<h2>Your Credentials</h2>
+			<div id="message" class="message"></div>
+			<table id="credentialsTable">
+				<thead>
+					<tr>
+						<th>URL</th>
+						<th>Username</th>
+						<th>Password</th>
+						<th>Notes</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Credentials will be dynamically loaded here by JavaScript -->
+				</tbody>
+			</table>
+			<p id="noCredentialsMessage" style="display: none">
+				No credentials found. Add one below!
+			</p>
+		</section>
+
+		<section class="add-credential-form">
+			<h2>Add New Credential</h2>
+			<form id="addCredentialForm">
+				<div class="form-group">
+					<label for="newUrl">Website URL:</label>
+					<input type="url" id="newUrl" required />
+				</div>
+				<div class="form-group">
+					<label for="newUsername">Username:</label>
+					<input type="text" id="newUsername" required />
+				</div>
+				<div class="form-group">
+					<label for="newPassword">Password:</label>
+					<input type="password" id="newPassword" required />
+				</div>
+				<div class="form-group">
+					<label for="newNotes">Notes (optional):</label>
+					<textarea id="newNotes"></textarea>
+				</div>
+				<button type="submit" class="btn btn-primary">
+					Add Credential
+				</button>
+			</form>
+		</section>
+	</div>
+
+	<script src="vault.js"></script>
+</body>
+
+</html>

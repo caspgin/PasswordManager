@@ -66,7 +66,7 @@ func vaultExist(filePath string) (bool, error) {
 
 	_, err := os.Stat(filePath)
 	if err == nil {
-		if filepath.Ext(filePath) == "vault" {
+		if filepath.Ext(filePath) == ".vault" {
 			return true, nil
 		}
 		return false, fmt.Errorf("File %q is not the write type or is a directory", filePath)
@@ -110,11 +110,14 @@ func LoadAndDecryptVault(MEK []byte) ([]Credential, error) {
 		return nil, fmt.Errorf("Loading Vault failed. %w", err)
 	}
 
+	if len(decryptedData) == 0 {
+		return []Credential{}, nil
+	}
 	//Unmarshall
 	var credentials []Credential
 	err = json.Unmarshal(decryptedData, &credentials)
 	if err != nil {
-		return nil, fmt.Errorf("Loading Vault Failed. %w", err)
+		return nil, fmt.Errorf("Loading Vault Failed.error marshalling %w", err)
 	}
 
 	return credentials, nil

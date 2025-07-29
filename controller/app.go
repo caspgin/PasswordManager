@@ -46,7 +46,7 @@ func (app *App) SignUp(username string, password string) error {
 
 	MEK := crypto.GetDerivedKey([]byte(password), newUser.MasterSalt, 100096)
 
-	err = vault.EncryptAndSaveVault(nil, MEK)
+	err = vault.EncryptAndSaveVault([]vault.Credential{}, MEK)
 
 	if err != nil {
 		return fmt.Errorf("Encryption Failed. %w", err)
@@ -88,7 +88,6 @@ func (app *App) SignOut() {
 func (app *App) AddCredential(url string, username string, password string) error {
 
 	app.DecryptedVault = append(app.DecryptedVault, vault.Credential{URL: url, Username: username, Password: password})
-
 	err := vault.EncryptAndSaveVault(app.DecryptedVault, app.key)
 	if err != nil {
 		app.DecryptedVault[len(app.DecryptedVault)-1] = vault.Credential{}
